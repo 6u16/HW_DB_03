@@ -38,11 +38,11 @@ LEFT JOIN albums al ON al.id = tr.album_id
 GROUP BY album_name;
 
 --9 Все исполнители, которые не выпустили альбомы в 2020 году
-select bands_name, release_date  from musicbands m
+SELECT  bands_name  from musicbands m
 LEFT JOIN musicbands_albums ma ON ma.bands_name_id  = m.id
 LEFT JOIN albums a ON a.id = ma.album_id
 WHERE release_date != '2020-01-1'
-group by bands_name, release_date;
+GROUP BY bands_name;
 
 --10 Названия сборников, в которых присутствует конкретный исполнитель (выберите его сами)
 SELECT collection_name FROM collection_of_songs cs
@@ -50,9 +50,10 @@ LEFT JOIN collection_tracks ct ON ct.collection_id = cs.id
 LEFT JOIN tracks t ON t.id = ct.track_id
 LEFT JOIN albums a ON a.id = t.album_id
 LEFT JOIN musicbands_albums ma ON ma.album_id = a.id
-LEFT JOIN musicbands m ON m.id = ma.bands_name_id
+right JOIN musicbands m ON m.id = ma.bands_name_id
 WHERE bands_name LIKE 'Tony Danza Topdance Extravaganza'
-GROUP BY collection_name;
+GROUP BY collection_name; -- Группировка для того чтобы вывести коллекцию не по кол.треков в ней
+
 -- Стразу проверка на связь таблиц, так как истинная связь Исполнитель-Альбом нарушена заданием ДЗ
 -- HW_DB_02_insert.sql <строка 86> --mix musicbands_albums (альбом выпущеный совместно несколькими группами) (3, 8), (6, 12), (5, 1);
 -- Таблица всех связей
@@ -105,9 +106,11 @@ LEFT JOIN tracks t ON t.album_id = a.id
 GROUP BY bands_name, duration
 HAVING (SELECT MIN(duration) FROM tracks) = duration;
 
---14  Названия альбомов, содержащих наименьшее количество треков
+-- Не засчитывайте, необязательное задание. 
+
+--14 Названия альбомов, содержащих наименьшее количество треков
 --14 Так и не разобрался как сделать по другому, однако это точно РАБОТАЕТ, проверял добавляя альбомы с одинаковым минимальным кол. треков
-SELECT album_name, COUNT(album_id) FROM albums a
-LEFT JOIN tracks t ON t.album_id = a.id
-GROUP BY album_name
-HAVING NOT (SELECT MIN(album_id) FROM tracks) < COUNT(album_id);
+-- SELECT album_name, COUNT(album_id) FROM albums a
+-- LEFT JOIN tracks t ON t.album_id = a.id
+-- GROUP BY album_name
+-- HAVING NOT (SELECT MIN(album_id) FROM tracks) < COUNT(album_id);
