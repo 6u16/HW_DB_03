@@ -37,22 +37,23 @@ SELECT album_name, AVG(duration) FROM tracks tr
 LEFT JOIN albums al ON al.id = tr.album_id
 GROUP BY album_name;
 
---9 Все исполнители, которые не выпустили альбомы в 2020 году
-SELECT  bands_name  from musicbands m
-LEFT JOIN musicbands_albums ma ON ma.bands_name_id  = m.id
+--9 Все исполнители, которые не выпустили альбомы в 2012 году
+SELECT DISTINCT bands_name  FROM musicbands m
+LEFT JOIN musicbands_albums ma ON ma.bands_name_id = m.id
 LEFT JOIN albums a ON a.id = ma.album_id
-WHERE release_date != '2020-01-1'
-GROUP BY bands_name;
+WHERE bands_name NOT IN (SELECT bands_name FROM musicbands m
+LEFT JOIN musicbands_albums ma ON ma.bands_name_id = m.id
+LEFT JOIN albums a ON a.id = ma.album_id
+WHERE release_date BETWEEN '2012-01-1' AND '2012-12-31');
 
 --10 Названия сборников, в которых присутствует конкретный исполнитель (выберите его сами)
-SELECT collection_name FROM collection_of_songs cs
+SELECT DISTINCT collection_name FROM collection_of_songs cs
 LEFT JOIN collection_tracks ct ON ct.collection_id = cs.id
 LEFT JOIN tracks t ON t.id = ct.track_id
 LEFT JOIN albums a ON a.id = t.album_id
 LEFT JOIN musicbands_albums ma ON ma.album_id = a.id
-right JOIN musicbands m ON m.id = ma.bands_name_id
-WHERE bands_name LIKE 'Tony Danza Topdance Extravaganza'
-GROUP BY collection_name; -- Группировка для того чтобы вывести коллекцию не по кол.треков в ней
+RIGHT JOIN musicbands m ON m.id = ma.bands_name_id
+WHERE bands_name LIKE 'Tony Danza Topdance Extravaganza';
 
 -- Стразу проверка на связь таблиц, так как истинная связь Исполнитель-Альбом нарушена заданием ДЗ
 -- HW_DB_02_insert.sql <строка 86> --mix musicbands_albums (альбом выпущеный совместно несколькими группами) (3, 8), (6, 12), (5, 1);
@@ -106,11 +107,14 @@ LEFT JOIN tracks t ON t.album_id = a.id
 GROUP BY bands_name, duration
 HAVING (SELECT MIN(duration) FROM tracks) = duration;
 
--- Не засчитывайте, необязательное задание. 
-
+--Проверьте пожалуйста, дошло наконец после подсказки с 9-м
 --14 Названия альбомов, содержащих наименьшее количество треков
---14 Так и не разобрался как сделать по другому, однако это точно РАБОТАЕТ, проверял добавляя альбомы с одинаковым минимальным кол. треков
--- SELECT album_name, COUNT(album_id) FROM albums a
--- LEFT JOIN tracks t ON t.album_id = a.id
--- GROUP BY album_name
--- HAVING NOT (SELECT MIN(album_id) FROM tracks) < COUNT(album_id);
+SELECT album_name FROM albums a
+LEFT JOIN tracks t ON t.album_id = a.id
+GROUP BY album_name
+HAVING COUNT(album_id) = (
+SELECT min(cnt) FROM 
+(SELECT album_name, COUNT(album_id) AS cnt FROM albums a
+LEFT JOIN tracks t ON t.album_id = a.id
+GROUP BY album_name)
+);
